@@ -7,6 +7,7 @@ ChatFooter.propTypes = {
 };
 
 export default function ChatFooter({ socket }) {
+  const { selectedId } = useContext(ChatContext);
   const [message, setMessage] = useState("");
 
   const handleTyping = () => {
@@ -16,12 +17,17 @@ export default function ChatFooter({ socket }) {
   const handleSendMessage = (e) => {
     e.preventDefault();
     //check if message is not empty and user logged in
-    if (message.trim() && sessionStorage.getItem("userName")) {
+    if (
+      message.trim() &&
+      selectedId.trim() &&
+      sessionStorage.getItem("userName")
+    ) {
       const data = {
         text: message,
         name: sessionStorage.getItem("userName"),
         id: `${socket.id}${Math.random()}`,
         socketID: socket.id,
+        roomid: `${selectedId}`,
       };
       socket.emit("message", data);
     }

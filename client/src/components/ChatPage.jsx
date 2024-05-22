@@ -15,35 +15,61 @@ ChatPage.propTypes = {
 export default function ChatPage({ socket }) {
   const [typingStatus, setTypingStatus] = useState("");
   const lastMessageRef = useRef(null);
-  const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [selectedId, setSelectedId] = useState("");
+
+  useEffect(() => {
+    socket.emit("get rooms");
+  }, [socket]);
+
+  useEffect(() => {
+    socket.on("getRoomsResponse", (data) => {
+      setRooms(data);
+    });
+  }, [socket]);
 
   useEffect(() => {
     socket.on("typingResponse", (data) => setTypingStatus(data));
   }, [socket]);
 
   useEffect(() => {
-    socket.on("messageResponse", ({ data, from }) => {
-      setMessages([...messages, data]);
+    socket.on("messageResponse", (rooms) => {
+      setRooms(rooms);
     });
-  }, [messages, socket]);
+  }, [selectedId, socket, rooms]);
 
   useEffect(() => {
     //scrolls to bottom when messages change
     lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  const getMessages = () => {
+    const selectedRoom = rooms.find((room) => room.id === selectedId);
+    if (selectedRoom) {
+      return selectedRoom.messages;
+    } else {
+      return [];
+    }
+  };
+
   return (
-    <ChatContext.Provider value={{ users, setUsers }}>
+    <ChatContext.Provider
+      value={{ users, setUsers, selectedId, setSelectedId, rooms, setRooms }}
+    >
       <div className="chat">
         <ChatBar socket={socket} />
         <div className="chat__main">
-          <ChatBody
-            messages={messages}
-            typingStatus={typingStatus}
-            lastMessageRef={lastMessageRef}
-          />
-          <ChatFooter socket={socket} />
+          {selectedId.trim() ? (
+            <ChatBody
+              messages={getMessages()}
+              typingStatus={typingStatus}
+              lastMessageRef={lastMessageRef}
+            />
+          ) : (
+            <></>
+          )}
+          {selectedId.trim() ? <ChatFooter socket={socket} /> : <></>}
         </div>
       </div>
     </ChatContext.Provider>

@@ -27,6 +27,12 @@
 .chat_user_item {
   display: flex;
   padding: 0.5em 1em;
+  color: #1e293b;
+}
+
+.room_item {
+  display: flex;
+  padding: 0.5em 1em;
   cursor: pointer;
   transition: color 0.2s ease, background-color 0.2s ease;
   background-color: transparent;

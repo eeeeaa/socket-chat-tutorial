@@ -5,6 +5,11 @@ const { Server } = require("socket.io");
 //stands in for database
 let users = [];
 
+let rooms = [
+  { id: `0665`, name: "test1", messages: [] },
+  { id: `1442`, name: "test2", messages: [] },
+];
+
 const app = express();
 const server = createServer(app);
 
@@ -31,9 +36,22 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("typingResponse", data);
   });
 
+  socket.on("get rooms", () => {
+    io.emit("getRoomsResponse", rooms);
+  });
+
+  socket.on("join room", (data) => {
+    socket.join(data.roomid);
+  });
+
   socket.on("message", (data) => {
     console.log(data);
-    io.emit("messageResponse", { data, from: socket.id });
+    for (const room of rooms) {
+      if (room.id === data.roomid) {
+        room.messages.push(data);
+      }
+    }
+    io.to(data.roomid).emit("messageResponse", rooms);
   });
 
   socket.on("disconnect", () => {
