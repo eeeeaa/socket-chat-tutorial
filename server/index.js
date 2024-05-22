@@ -37,11 +37,36 @@ io.on("connection", (socket) => {
   });
 
   socket.on("get rooms", () => {
-    io.emit("getRoomsResponse", rooms);
+    io.emit("roomsResponse", rooms);
+  });
+
+  socket.on("create room", (room) => {
+    if (rooms.find((val) => val.id === room.id) === undefined) {
+      rooms.push(room);
+    }
+    io.emit("roomsResponse", rooms);
   });
 
   socket.on("join room", (data) => {
-    socket.join(data.roomid);
+    try {
+      console.log("[socket]", "join room :", data.roomid);
+      socket.join(data.roomid);
+      socket.to(data.roomid).emit("user joined", socket.id);
+    } catch (e) {
+      console.log("[error]", "join room :", e);
+      socket.emit("error", "couldnt perform requested action");
+    }
+  });
+
+  socket.on("leave room", (data) => {
+    try {
+      console.log("[socket]", "leave room :", data.roomid);
+      socket.leave(data.roomid);
+      socket.to(data.roomid).emit("user left", socket.id);
+    } catch (e) {
+      console.log("[error]", "leave room :", e);
+      socket.emit("error", "couldnt perform requested action");
+    }
   });
 
   socket.on("message", (data) => {

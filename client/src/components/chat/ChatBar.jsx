@@ -58,6 +58,14 @@ export default function ChatBar({ socket }) {
     socket.on("newUserResponse", (data) => setUsers(data));
   }, [socket, users, setUsers]);
 
+  const handleCreateRoom = () => {
+    socket.emit("create room", {
+      id: `${Math.floor(Math.random() * (1000 + 1))}`,
+      name: `room${Math.floor(Math.random() * (1000 + 1))}`,
+      messages: [],
+    });
+  };
+
   return (
     <div className="chat__sidebar">
       <h2>Open Chat</h2>
@@ -77,7 +85,12 @@ export default function ChatBar({ socket }) {
         </div>
       </div>
       <div>
-        <h4 className="chat__header">ROOMS</h4>
+        <div className="room_header">
+          <h4 className="room_title">ROOMS</h4>
+          <button className="create_room_button" onClick={handleCreateRoom}>
+            Create
+          </button>
+        </div>
         <div className="chat__users">
           {rooms.map((room) => (
             <Room key={room.id} room={room} socket={socket} />

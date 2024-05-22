@@ -20,11 +20,13 @@ export default function ChatPage({ socket }) {
   const [selectedId, setSelectedId] = useState("");
 
   useEffect(() => {
+    //request for initial room data
     socket.emit("get rooms");
   }, [socket]);
 
   useEffect(() => {
-    socket.on("getRoomsResponse", (data) => {
+    //populate initial room data
+    socket.on("roomsResponse", (data) => {
       setRooms(data);
     });
   }, [socket]);
